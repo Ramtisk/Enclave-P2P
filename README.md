@@ -30,26 +30,24 @@ The project is divided into two main components written in **C**:
 2.  **Enclave Client (The Peer):** Manages encryption, file chunking, and direct P2P communication.
 
 ### Diagrama de Fluxo de Rede
-___
-                     ┌──────────────────┐
-                     │   RELAY SERVER   │
-                     │  (Coordination)  │
-                     └────────┬─────────┘
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        │                     │                     │
-   ┌────▼──────┐        ┌─────▼─────┐         ┌─────▼─────┐
-   │ ENCLAVE A │        │ ENCLAVE B │         │ ENCLAVE C │
-   │ [P1] [P2] │        │ [P3] [P4] │         │ [P5] [P6] │
-   └───────────┘        └───────────┘         └───────────┘
+
+                      ┌──────────────────┐
+                      │   RELAY SERVER   │
+                      │  (Coordination)  │
+                      └────────┬─────────┘
+                               │
+         ┌─────────────────────┼─────────────────────┐
+         │                     │                     │
+    ┌────▼──────┐        ┌─────▼─────┐         ┌─────▼─────┐
+    │ ENCLAVE A │        │ ENCLAVE B │         │ ENCLAVE C │
+    │ [P1] [P2] │        │ [P3] [P4] │         │ [P5] [P6] │
+    └───────────┘        └───────────┘         └───────────┘
         ▲                     X                     X
         │ P2P Direct (TLS)    └─ No comunication────┘
         ▼                        between groups.
-   ┌───────────┐
-   │ 📁 Shards │
-   └───────────┘
-
-___
+    ┌───────────┐
+    │ 📁 Shards │
+    └───────────┘
 
 ---
 
