@@ -1,0 +1,148 @@
+@startuml P2P File Sharing System
+
+' === CORE ===
+package "Core" {
+    class Message {
+        +int tipo
+        +char nome[256]
+        +char conteudo[2048]
+        +long timestamp
+    }
+    
+    class MessageFactory {
+        +Message* createConnectMsg()
+        +Message* createSearchMsg(query)
+        +Message* createDownloadMsg(hash)
+        +Message* createBlockMsg(data)
+    }
+    
+    class Protocol {
+        +{static} int PORTO_SERVIDOR
+        +{static} int TAMANHO_BLOCO
+    }
+}
+
+' === COMMAND PATTERN ===
+package "Commands" {
+    interface ICommand {
+        +execute()
+        +undo()
+    }
+    
+    class ConnectCommand implements ICommand {
+        -Peer* peer
+        +execute()
+    }
+    
+    class SearchCommand implements ICommand {
+        -char* query
+        -Tracker* tracker
+        +execute()
+    }
+    
+    class DownloadCommand implements ICommand {
+        -FileInfo* file
+        -TransferManager* tm
+        +execute()
+    }
+}
+
+' === STRATEGY PATTERN ===
+package "Transfer" {
+    interface ITransferStrategy {
+        +transfer(FileInfo, Peer[])
+    }
+    
+    class SequentialStrategy implements ITransferStrategy {
+        +transfer(FileInfo, Peer[])
+    }
+    
+    class ParallelStrategy implements ITransferStrategy {
+        -int max_connections
+        +transfer(FileInfo, Peer[])
+    }
+    
+    class TransferManager {
+        -ITransferStrategy* strategy
+        +setStrategy(ITransferStrategy*)
+        +downloadFile(hash)
+        +uploadBlock(block_id, peer)
+    }
+    
+    class Chunker {
+        +Block[] splitFile(path)
+        +File assembleBlocks(Block[])
+        +char* calculateHash(data)
+    }
+}
+
+' === OBSERVER PATTERN ===
+package "Observer" {
+    interface IObserver {
+        +onEvent(Event)
+    }
+    
+    interface ISubject {
+        +attach(IObserver)
+        +detach(IObserver)
+        +notify(Event)
+    }
+    
+    class EventManager implements ISubject {
+        -IObserver[] observers
+        +attach(IObserver)
+        +notify(Event)
+    }
+    
+    class DownloadObserver implements IObserver {
+        +onEvent(Event)
+    }
+}
+
+' === SINGLETON ===
+package "Network" {
+    class ConnectionManager {
+        -{static} ConnectionManager* instance
+        -Connection[] connections
+        +{static} getInstance()
+        +connect(ip, port)
+        +disconnect(peer_id)
+        +send(peer_id, data)
+    }
+    
+    class Peer {
+        +char id[64]
+        +char ip[16]
+        +int porto
+        +int online
+    }
+}
+
+' === SERVER (MEDIATOR) ===
+package "Server" {
+    class Tracker {
+        -FileInfo[] index
+        -Peer[] peers
+        +registerFile(peer, file)
+        +search(query): FileInfo[]
+        +getPeersForFile(hash): Peer[]
+    }
+    
+    class PeerRegistry {
+        -Peer[] peers
+        +register(Peer)
+        +unregister(peer_id)
+        +getOnlinePeers(): Peer[]
+    }
+}
+
+' === RELAÇÕES ===
+TransferManager --> ITransferStrategy
+TransferManager --> Chunker
+ConnectionManager --> Peer
+Tracker --> PeerRegistry
+SearchCommand --> Tracker
+DownloadCommand --> TransferManager
+MessageFactory --> Message
+
+@enduml

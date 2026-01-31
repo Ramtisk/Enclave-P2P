@@ -1,0 +1,67 @@
+@startuml Download Flow v2.0
+
+title P2P-Share v2.0 - Download com Erasure Coding + DHT + PQC
+
+actor User
+participant "Cliente A" as A
+participant "DHT Network" as DHT
+participant "Cliente B" as B
+participant "Cliente C" as C
+participant "Cliente D" as D
+
+== Procura via DHT (sem servidor central) ==
+
+User -> A: procura "documento.pdf"
+A -> A: key = SHA256("documento.pdf")
+
+A -> DHT: FIND_VALUE(key)
+note right: Lookup iterativo\nKademlia XOR distance
+
+DHT --> A: {hash, tamanho, erasure_config,\npeers:[B,C,D], shards_map}
+
+== Handshake Pós-Quântico ==
+
+par Conexões com PQC
+    A -> B: Hybrid Key Exchange\n(X25519 + Kyber768)
+    B --> A: kyber_ciphertext +\nx25519_ephemeral
+    
+    A -> C: Hybrid Key Exchange
+    C --> A: kyber_ciphertext +\nx25519_ephemeral
+    
+    A -> D: Hybrid Key Exchange
+    D --> A: kyber_ciphertext +\nx25519_ephemeral
+end
+
+note over A,D: Shared secrets derivados:\nSHA512(X25519_shared || Kyber_shared)
+
+== Download Erasure Shards (via WebSocket/TLS) ==
+
+A -> B: [WebSocket Frame]\nMSG_QUERO {shards: [0,1]}
+A -> C: [WebSocket Frame]\nMSG_QUERO {shards: [2,3]}
+A -> D: [WebSocket Frame]\nMSG_QUERO {shards: [4,5]}
+
+note over A,D: Tráfego parece HTTPS normal\nSNI: cdn.cloudflare.com
+
+loop Para cada shard
+    B --> A: [Encrypted]\nMSG_SHARD {id:0, data, hash}
+    A -> A: verificar hash_shard
+    A --> B: MSG_ACK {shard_id: 0}
+end
+
+== Reconstrução Reed-Solomon ==
+
+A -> A: erasure_decode()\nk=4 shards → ficheiro original
+
+A -> A: verificar hash_ficheiro_completo
+A -> A: dilithium_verify(signature)
+
+A --> User: Download completo! ✓
+
+== Redistribuição de Shards ==
+
+A -> A: erasure_encode(ficheiro)
+A -> DHT: STORE(key, {peer:A, shards:[6,7]})
+
+note right: A agora contribui\ncom 2 shards adicionais\npara redundância
+
+@enduml
