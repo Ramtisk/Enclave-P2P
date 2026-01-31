@@ -29,7 +29,7 @@ The project is divided into two main components written in **C**:
 1.  **Relay Server (The Sentinel):** Coordinates peer discovery and voting without ever touching the actual files or knowing real identities.
 2.  **Enclave Client (The Peer):** Manages encryption, file chunking, and direct P2P communication.
 
-### Diagrama de Fluxo de Rede
+### Network flux Diagram
 
                       ┌──────────────────┐
                       │   RELAY SERVER   │
