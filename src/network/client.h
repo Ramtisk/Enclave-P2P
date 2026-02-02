@@ -28,8 +28,8 @@ typedef struct {
     // Threading
     pthread_t recv_thread;
     bool recv_thread_running;
-    pthread_t ping_thread;          // NEW: Auto-ping thread
-    bool ping_thread_running;       // NEW: Ping thread control
+    pthread_t ping_thread;
+    bool ping_thread_running;
     pthread_mutex_t send_mutex;
     
     // Callbacks
@@ -40,6 +40,18 @@ typedef struct {
     uint32_t ping_counter;
     uint64_t last_ping_sent;
     uint64_t rtt_ms;
+    
+    // Group info (Phase 2)
+    char group_id[MAX_ID_LENGTH];
+    char group_name[MAX_GROUP_NAME];
+    char invite_token[INVITE_TOKEN_LENGTH];
+    bool in_group;
+    
+    // Pending vote request
+    char pending_vote_request_id[MAX_ID_LENGTH];
+    char pending_vote_requester[MAX_ID_LENGTH];
+    char pending_vote_group[MAX_ID_LENGTH];
+    bool has_pending_vote;
     
     // Statistics
     uint64_t messages_sent;
@@ -64,6 +76,13 @@ bool client_is_connected(p2p_client_t* client);
 // Messaging
 int client_send_message(p2p_client_t* client, message_t* msg);
 int client_send_ping(p2p_client_t* client);
+
+// Group operations (Phase 2)
+int client_create_group(p2p_client_t* client, const char* group_name);
+int client_join_group(p2p_client_t* client, const char* invite_token);
+int client_leave_group(p2p_client_t* client);
+int client_vote(p2p_client_t* client, bool approve);
+int client_request_invite(p2p_client_t* client);
 
 // Callbacks
 void client_set_message_callback(p2p_client_t* client, message_callback_t callback, void* user_data);

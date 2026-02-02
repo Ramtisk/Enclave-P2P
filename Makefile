@@ -6,13 +6,14 @@ SRC_DIR = src
 BUILD_DIR = build
 APPS_DIR = apps
 
-RELAY_SRC = $(SRC_DIR)/network/relay.c
+# Source files
+RELAY_SRC = $(SRC_DIR)/network/relay.c $(SRC_DIR)/core/group_mgmt.c
 CLIENT_SRC = $(SRC_DIR)/network/client.c
 
 RELAY_BIN = $(BUILD_DIR)/relay
 CLIENT_BIN = $(BUILD_DIR)/client
 
-.PHONY: all clean relay client run-relay run-client
+.PHONY: all clean relay client run-relay run-client test-groups
 
 all: $(BUILD_DIR) relay client
 
@@ -33,3 +34,9 @@ run-relay: relay
 
 run-client: client
 	$(CLIENT_BIN) -v
+
+test-groups: relay client
+	@echo "=== Testing Group System ==="
+	@echo "Start relay in one terminal: make run-relay"
+	@echo "Start clients in other terminals: make run-client"
+	@echo "Use 'c' to create group, 'j <token>' to join"

@@ -66,12 +66,57 @@ static void* client_recv_thread(void* arg) {
                      message_type_string(msg->header.type),
                      msg->header.sender_id);
             
+            // Handle PONG internally
             if (msg->header.type == MSG_PONG) {
                 payload_ping_t* pong = (payload_ping_t*)msg->payload;
                 uint64_t now = get_timestamp_ms();
                 client->rtt_ms = now - pong->ping_time;
                 LOG_DEBUG("PONG received (id: %u, RTT: %lu ms)", 
                          pong->ping_id, client->rtt_ms);
+            }
+            
+            // Handle vote request internally
+            if (msg->header.type == MSG_GROUP_VOTE_REQ) {
+                payload_vote_request_t* vote_req = (payload_vote_request_t*)msg->payload;
+                strncpy(client->pending_vote_request_id, vote_req->request_id, 
+                       MAX_ID_LENGTH - 1);
+                strncpy(client->pending_vote_requester, vote_req->requester_id,
+                       MAX_ID_LENGTH - 1);
+                strncpy(client->pending_vote_group, vote_req->group_id,
+                       MAX_ID_LENGTH - 1);
+                client->has_pending_vote = true;
+                
+                LOG_INFO("=== VOTE REQUEST ===");
+                LOG_INFO("User '%s' wants to join your group.", vote_req->requester_id);
+                LOG_INFO("Press 'y' to approve or 'n' to reject");
+            }
+            
+            // Handle group approval
+            if (msg->header.type == MSG_GROUP_APPROVED) {
+                payload_group_result_t* result = (payload_group_result_t*)msg->payload;
+                strncpy(client->group_id, result->group_id, MAX_ID_LENGTH - 1);
+                strncpy(client->group_name, result->group_name, MAX_GROUP_NAME - 1);
+                client->in_group = true;
+                
+                LOG_INFO("=== JOINED GROUP ===");
+                LOG_INFO("Group: %s (%s)", result->group_name, result->group_id);
+                LOG_INFO("Members: %u", result->member_count);
+            }
+            
+            // Handle group rejection
+            if (msg->header.type == MSG_GROUP_REJECTED) {
+                LOG_WARN("=== JOIN REJECTED ===");
+                LOG_WARN("Your request to join the group was rejected.");
+            }
+            
+            // Handle group info
+            if (msg->header.type == MSG_GROUP_INFO) {
+                payload_group_info_t* info = (payload_group_info_t*)msg->payload;
+                LOG_INFO("=== GROUP PEERS ===");
+                for (uint32_t i = 0; i < info->peer_count; i++) {
+                    LOG_INFO("  - %s (%s:%d)", 
+                            info->peers[i].id, info->peers[i].ip, info->peers[i].port);
+                }
             }
             
             if (client->on_message) {
@@ -94,14 +139,12 @@ static void* client_ping_thread(void* arg) {
     LOG_DEBUG("Auto-ping thread started (interval: %d ms)", PING_INTERVAL_MS);
     
     while (client->ping_thread_running && client->connected) {
-        // Sleep for ping interval
         usleep(PING_INTERVAL_MS * 1000);
         
         if (!client->connected || !client->ping_thread_running) {
             break;
         }
         
-        // Send ping
         if (client_send_ping(client) == 0) {
             LOG_TRACE("Auto-ping sent (id: %u)", client->ping_counter);
         }
@@ -123,6 +166,8 @@ int client_init(p2p_client_t* client, const char* relay_host, uint16_t relay_por
     client->relay_port = relay_port;
     client->socket_fd = -1;
     client->connected = false;
+    client->in_group = false;
+    client->has_pending_vote = false;
     
     pthread_mutex_init(&client->send_mutex, NULL);
     
@@ -218,7 +263,12 @@ void client_disconnect(p2p_client_t* client) {
     
     LOG_INFO("Disconnecting from relay...");
     
-    // Send DISCONNECT message (best effort)
+    // Leave group if in one
+    if (client->in_group) {
+        client_leave_group(client);
+    }
+    
+    // Send DISCONNECT message
     message_t disconnect_msg;
     memset(&disconnect_msg, 0, sizeof(disconnect_msg));
     message_header_init(&disconnect_msg.header, MSG_DISCONNECT);
@@ -230,14 +280,12 @@ void client_disconnect(p2p_client_t* client) {
     client->ping_thread_running = false;
     client->connected = false;
     
-    // Close socket
     if (client->socket_fd > 0) {
         shutdown(client->socket_fd, SHUT_RDWR);
         close(client->socket_fd);
         client->socket_fd = -1;
     }
     
-    // Wait for threads
     pthread_join(client->recv_thread, NULL);
     pthread_join(client->ping_thread, NULL);
     
@@ -308,6 +356,127 @@ int client_send_ping(p2p_client_t* client) {
     
     LOG_DEBUG("Sending PING (id: %u)", payload->ping_id);
     return client_send_message(client, &ping);
+}
+
+// ============================================
+// GROUP OPERATIONS (Phase 2)
+// ============================================
+
+int client_create_group(p2p_client_t* client, const char* group_name) {
+    if (client->in_group) {
+        LOG_WARN("Already in a group. Leave first.");
+        return -1;
+    }
+    
+    LOG_INFO("Creating group: %s", group_name);
+    
+    message_t msg;
+    memset(&msg, 0, sizeof(msg));
+    message_header_init(&msg.header, MSG_GROUP_CREATE);
+    strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+    
+    payload_group_create_t* payload = (payload_group_create_t*)msg.payload;
+    strncpy(payload->group_name, group_name, MAX_GROUP_NAME - 1);
+    msg.header.payload_length = sizeof(payload_group_create_t);
+    
+    return client_send_message(client, &msg);
+}
+
+int client_join_group(p2p_client_t* client, const char* invite_token) {
+    if (client->in_group) {
+        LOG_WARN("Already in a group. Leave first.");
+        return -1;
+    }
+    
+    LOG_INFO("Joining group with token: %s", invite_token);
+    
+    message_t msg;
+    memset(&msg, 0, sizeof(msg));
+    message_header_init(&msg.header, MSG_GROUP_JOIN);
+    strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+    
+    payload_group_join_t* payload = (payload_group_join_t*)msg.payload;
+    strncpy(payload->invite_token, invite_token, INVITE_TOKEN_LENGTH - 1);
+    msg.header.payload_length = sizeof(payload_group_join_t);
+    
+    return client_send_message(client, &msg);
+}
+
+int client_leave_group(p2p_client_t* client) {
+    if (!client->in_group) {
+        LOG_WARN("Not in a group.");
+        return -1;
+    }
+    
+    LOG_INFO("Leaving group: %s", client->group_id);
+    
+    message_t msg;
+    memset(&msg, 0, sizeof(msg));
+    message_header_init(&msg.header, MSG_GROUP_LEAVE);
+    strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+    
+    payload_group_leave_t* payload = (payload_group_leave_t*)msg.payload;
+    strncpy(payload->group_id, client->group_id, MAX_ID_LENGTH - 1);
+    msg.header.payload_length = sizeof(payload_group_leave_t);
+    
+    int result = client_send_message(client, &msg);
+    
+    // Clear local state
+    memset(client->group_id, 0, sizeof(client->group_id));
+    memset(client->group_name, 0, sizeof(client->group_name));
+    memset(client->invite_token, 0, sizeof(client->invite_token));
+    client->in_group = false;
+    
+    return result;
+}
+
+int client_vote(p2p_client_t* client, bool approve) {
+    if (!client->has_pending_vote) {
+        LOG_WARN("No pending vote request.");
+        return -1;
+    }
+    
+    LOG_INFO("Voting %s for %s", approve ? "YES" : "NO", client->pending_vote_requester);
+    
+    message_t msg;
+    memset(&msg, 0, sizeof(msg));
+    message_header_init(&msg.header, MSG_GROUP_VOTE);
+    strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+    
+    payload_group_vote_t* payload = (payload_group_vote_t*)msg.payload;
+    strncpy(payload->group_id, client->pending_vote_group, MAX_ID_LENGTH - 1);
+    strncpy(payload->request_id, client->pending_vote_request_id, MAX_ID_LENGTH - 1);
+    strncpy(payload->requester_id, client->pending_vote_requester, MAX_ID_LENGTH - 1);
+    payload->approved = approve ? 1 : 0;
+    msg.header.payload_length = sizeof(payload_group_vote_t);
+    
+    // Clear pending vote
+    client->has_pending_vote = false;
+    memset(client->pending_vote_request_id, 0, sizeof(client->pending_vote_request_id));
+    memset(client->pending_vote_requester, 0, sizeof(client->pending_vote_requester));
+    memset(client->pending_vote_group, 0, sizeof(client->pending_vote_group));
+    
+    return client_send_message(client, &msg);
+}
+
+int client_request_invite(p2p_client_t* client) {
+    if (!client->in_group) {
+        LOG_WARN("Not in a group.");
+        return -1;
+    }
+    
+    LOG_INFO("Requesting new invite token");
+    
+    message_t msg;
+    memset(&msg, 0, sizeof(msg));
+    message_header_init(&msg.header, MSG_GROUP_INVITE);
+    strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+    
+    payload_invite_request_t* payload = (payload_invite_request_t*)msg.payload;
+    strncpy(payload->group_id, client->group_id, MAX_ID_LENGTH - 1);
+    msg.header.payload_length = sizeof(payload_invite_request_t);
+    
+    return client_send_message(client, &msg);
 }
 
 // ============================================

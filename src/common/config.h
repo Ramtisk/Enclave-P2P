@@ -5,7 +5,7 @@
 // VERSION
 // ============================================
 #define P2P_VERSION_MAJOR 0
-#define P2P_VERSION_MINOR 1
+#define P2P_VERSION_MINOR 2
 #define P2P_VERSION_PATCH 0
 
 // ============================================
@@ -22,6 +22,14 @@
 #define MAX_ID_LENGTH 64
 #define MAX_PAYLOAD_SIZE 4096
 #define READ_BUFFER_SIZE 8192
+
+// ============================================
+// GROUP LIMITS (Phase 2)
+// ============================================
+#define MAX_GROUPS 32
+#define MAX_GROUP_MEMBERS 16
+#define MAX_PENDING_JOINS 8
+#define VOTE_TIMEOUT_MS 60000  // 1 minute to vote
 
 // ============================================
 // TIMEOUTS (milliseconds)
