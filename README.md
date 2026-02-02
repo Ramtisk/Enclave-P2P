@@ -78,8 +78,8 @@ ENCLAVE uses a layered security stack:
 ## 📅 Roadmap de Desenvolvimento
 
 - [x] **Define Architecture and Protocol**
-- [ ] **Phase 1:** Core Relay Server and Basic Handshake (In Progress)
-- [ ] **Phase 2:** Group System and Voting Logic
+- [x] **Phase 1:** Core Relay Server and Basic Handshake (In Progress)
+- [x] **Phase 2:** Group System and Voting Logic
 - [ ] **Phase 3:** File Chunking and Direct P2P Transfer
 - [ ] **Phase 4:** Implement Erasure Coding and NAT Traversal
 - [ ] **Phase 5:** CLI Interface (Ncurses) and Security Audit
