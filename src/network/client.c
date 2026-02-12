@@ -1,5 +1,6 @@
 #include "client.h"
 #include "../common/logging.h"
+#include "nat_traversal/nat_traversal.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,17 +13,24 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#define PUNCH_TIMEOUT_MS         5000
+#define PUNCH_MAX_ATTEMPTS       3
+#define PUNCH_CONNECT_TIMEOUT_MS 2000
+#define SIMULTANEOUS_DELAY_MS    100
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
 
-static uint64_t get_timestamp_ms(void) {
+static uint64_t get_timestamp_ms(void)
+{
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     return (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
 
-static void generate_client_id(char* id, size_t len) {
+static void generate_client_id(char *id, size_t len)
+{
     snprintf(id, len, "peer_%d_%lu", getpid(), get_timestamp_ms() % 100000);
 }
 
@@ -30,101 +38,198 @@ static void generate_client_id(char* id, size_t len) {
 // RECEIVE THREAD
 // ============================================
 
-static void* client_recv_thread(void* arg) {
-    p2p_client_t* client = (p2p_client_t*)arg;
+static void *client_recv_thread(void *arg)
+{
+    p2p_client_t *client = (p2p_client_t *)arg;
     uint8_t buffer[READ_BUFFER_SIZE];
-    
+
     LOG_DEBUG("Receive thread started");
-    
-    while (client->recv_thread_running && client->connected) {
+
+    while (client->recv_thread_running && client->connected)
+    {
         ssize_t bytes = recv(client->socket_fd, buffer, sizeof(buffer), 0);
-        
-        if (bytes <= 0) {
-            if (bytes == 0) {
+
+        if (bytes <= 0)
+        {
+            if (bytes == 0)
+            {
                 LOG_INFO("Connection closed by relay");
-            } else if (errno != EINTR) {
+            }
+            else if (errno != EINTR)
+            {
                 LOG_ERROR("Receive error: %s", strerror(errno));
             }
             client->connected = false;
             break;
         }
-        
+
         client->bytes_received += bytes;
-        
-        if (bytes >= (ssize_t)sizeof(message_header_t)) {
-            message_t* msg = (message_t*)buffer;
-            
+
+        if (bytes >= (ssize_t)sizeof(message_header_t))
+        {
+            message_t *msg = (message_t *)buffer;
+
             int validation = message_validate(msg);
-            if (validation != 0) {
+            if (validation != 0)
+            {
                 LOG_WARN("Invalid message received (error: %d)", validation);
                 continue;
             }
-            
+
             client->messages_received++;
-            
-            LOG_DEBUG("Received %s from %s", 
-                     message_type_string(msg->header.type),
-                     msg->header.sender_id);
-            
+
+            LOG_DEBUG("Received %s from %s",
+                      message_type_string(msg->header.type),
+                      msg->header.sender_id);
+
             // Handle PONG internally
-            if (msg->header.type == MSG_PONG) {
-                payload_ping_t* pong = (payload_ping_t*)msg->payload;
+            if (msg->header.type == MSG_PONG)
+            {
+                payload_ping_t *pong = (payload_ping_t *)msg->payload;
                 uint64_t now = get_timestamp_ms();
                 client->rtt_ms = now - pong->ping_time;
-                LOG_DEBUG("PONG received (id: %u, RTT: %lu ms)", 
-                         pong->ping_id, client->rtt_ms);
+                LOG_DEBUG("PONG received (id: %u, RTT: %lu ms)",
+                          pong->ping_id, client->rtt_ms);
             }
-            
+
             // Handle vote request internally
-            if (msg->header.type == MSG_GROUP_VOTE_REQ) {
-                payload_vote_request_t* vote_req = (payload_vote_request_t*)msg->payload;
-                strncpy(client->pending_vote_request_id, vote_req->request_id, 
-                       MAX_ID_LENGTH - 1);
+            if (msg->header.type == MSG_GROUP_VOTE_REQ)
+            {
+                payload_vote_request_t *vote_req = (payload_vote_request_t *)msg->payload;
+                strncpy(client->pending_vote_request_id, vote_req->request_id,
+                        MAX_ID_LENGTH - 1);
                 strncpy(client->pending_vote_requester, vote_req->requester_id,
-                       MAX_ID_LENGTH - 1);
+                        MAX_ID_LENGTH - 1);
                 strncpy(client->pending_vote_group, vote_req->group_id,
-                       MAX_ID_LENGTH - 1);
+                        MAX_ID_LENGTH - 1);
                 client->has_pending_vote = true;
-                
+
                 LOG_INFO("=== VOTE REQUEST ===");
                 LOG_INFO("User '%s' wants to join your group.", vote_req->requester_id);
                 LOG_INFO("Press 'y' to approve or 'n' to reject");
             }
-            
+
             // Handle group approval
-            if (msg->header.type == MSG_GROUP_APPROVED) {
-                payload_group_result_t* result = (payload_group_result_t*)msg->payload;
+            if (msg->header.type == MSG_GROUP_APPROVED)
+            {
+                payload_group_result_t *result = (payload_group_result_t *)msg->payload;
                 strncpy(client->group_id, result->group_id, MAX_ID_LENGTH - 1);
                 strncpy(client->group_name, result->group_name, MAX_GROUP_NAME - 1);
                 client->in_group = true;
-                
+
                 LOG_INFO("=== JOINED GROUP ===");
                 LOG_INFO("Group: %s (%s)", result->group_name, result->group_id);
                 LOG_INFO("Members: %u", result->member_count);
             }
-            
+
             // Handle group rejection
-            if (msg->header.type == MSG_GROUP_REJECTED) {
+            if (msg->header.type == MSG_GROUP_REJECTED)
+            {
                 LOG_WARN("=== JOIN REJECTED ===");
                 LOG_WARN("Your request to join the group was rejected.");
             }
-            
+
             // Handle group info
-            if (msg->header.type == MSG_GROUP_INFO) {
-                payload_group_info_t* info = (payload_group_info_t*)msg->payload;
+            if (msg->header.type == MSG_GROUP_INFO)
+            {
+                payload_group_info_t *info = (payload_group_info_t *)msg->payload;
                 LOG_INFO("=== GROUP PEERS ===");
-                for (uint32_t i = 0; i < info->peer_count; i++) {
-                    LOG_INFO("  - %s (%s:%d)", 
-                            info->peers[i].id, info->peers[i].ip, info->peers[i].port);
+                for (uint32_t i = 0; i < info->peer_count; i++)
+                {
+                    LOG_INFO("  - %s (%s:%d)",
+                             info->peers[i].id, info->peers[i].ip, info->peers[i].port);
                 }
             }
+
+            // Handle file announcement (Phase 3)
+            if (msg->header.type == MSG_FILE_ANNOUNCE)
+            {
+                payload_file_announce_t *announce = (payload_file_announce_t *)msg->payload;
+
+                // Don't add our own files
+                if (strcmp(msg->header.sender_id, client->id) != 0)
+                {
+                    char hash_hex[65];
+                    hash_to_hex((const uint8_t *)announce->file_hash, hash_hex, sizeof(hash_hex));
+                    LOG_INFO("=== FILE ANNOUNCED ===");
+                    LOG_INFO("File: %s (hash: %.16s...)", announce->filename, hash_hex);
+                    LOG_INFO("From: %s", msg->header.sender_id);
+
+                    // Calculate owner's P2P port from their client ID
+                    // Format: peer_PID_XXX -> port = 7000 + (PID % 1000)
+                    uint16_t owner_port = P2P_LISTEN_PORT_BASE;
+                    const char *pid_str = msg->header.sender_id + 5; // Skip "peer_"
+                    if (pid_str)
+                    {
+                        int pid = atoi(pid_str);
+                        owner_port = P2P_LISTEN_PORT_BASE + (pid % 1000);
+                    }
+
+                    file_manager_register_file(&client->file_mgr, announce,
+                                               "127.0.0.1", owner_port);
+                }
+            }
+
+            // Handle file list request - respond with our files
+            if (msg->header.type == MSG_FILE_LIST)
+            {
+                LOG_INFO("=== FILE LIST REQUEST ===");
+                LOG_INFO("Peer %s is requesting file list", msg->header.sender_id);
+
+                // Send announcements for all our files
+                for (int i = 0; i < client->file_mgr.file_count; i++)
+                {
+                    shared_file_t *file = &client->file_mgr.files[i];
+
+                    // Only announce files we own (have complete)
+                    if (file->metadata.is_complete &&
+                        strcmp(file->owner_id, client->id) == 0)
+                    {
+                        client_announce_file(client, file);
+                    }
+                }
+            }
+
+             // Handle NAT messages
+            if (msg->header.type == MSG_NAT_INFO) {
+                payload_nat_info_t* nat_info = (payload_nat_info_t*)msg->payload;
+                nat_set_info(&client->nat_mgr, nat_info);
+                LOG_INFO("NAT: Public endpoint discovered: %s:%d (type: %s)",
+                         nat_info->public_ip, nat_info->public_port,
+                         nat_type_string((nat_type_t)nat_info->nat_type));
+            }
             
-            if (client->on_message) {
+            if (msg->header.type == MSG_NAT_PUNCH_INSTR) {
+                payload_punch_instruction_t* instr = 
+                    (payload_punch_instruction_t*)msg->payload;
+                LOG_INFO("NAT: Received punch instruction for peer %s", instr->peer_id);
+                
+                // Run punch in separate thread to avoid blocking recv
+                // For simplicity, handle inline (blocking is ok for now)
+                int fd = nat_handle_punch_instruction(&client->nat_mgr, instr);
+                
+                // Report result to relay
+                message_t result_msg;
+                memset(&result_msg, 0, sizeof(result_msg));
+                message_header_init(&result_msg.header, MSG_NAT_PUNCH_RESULT);
+                strncpy(result_msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+                
+                payload_punch_result_t* result = 
+                    (payload_punch_result_t*)result_msg.payload;
+                strncpy(result->peer_id, instr->peer_id, sizeof(result->peer_id) - 1);
+                result->success = (fd >= 0) ? 1 : 0;
+                result_msg.header.payload_length = sizeof(payload_punch_result_t);
+                
+                client_send_message(client, &result_msg);
+            }
+
+            if (client->on_message)
+            {
                 client->on_message(msg, client->callback_user_data);
             }
         }
     }
-    
+
     LOG_DEBUG("Receive thread exiting");
     return NULL;
 }
@@ -133,23 +238,27 @@ static void* client_recv_thread(void* arg) {
 // PING THREAD (AUTO PING)
 // ============================================
 
-static void* client_ping_thread(void* arg) {
-    p2p_client_t* client = (p2p_client_t*)arg;
-    
+static void *client_ping_thread(void *arg)
+{
+    p2p_client_t *client = (p2p_client_t *)arg;
+
     LOG_DEBUG("Auto-ping thread started (interval: %d ms)", PING_INTERVAL_MS);
-    
-    while (client->ping_thread_running && client->connected) {
+
+    while (client->ping_thread_running && client->connected)
+    {
         usleep(PING_INTERVAL_MS * 1000);
-        
-        if (!client->connected || !client->ping_thread_running) {
+
+        if (!client->connected || !client->ping_thread_running)
+        {
             break;
         }
-        
-        if (client_send_ping(client) == 0) {
+
+        if (client_send_ping(client) == 0)
+        {
             LOG_TRACE("Auto-ping sent (id: %u)", client->ping_counter);
         }
     }
-    
+
     LOG_DEBUG("Auto-ping thread exiting");
     return NULL;
 }
@@ -158,9 +267,10 @@ static void* client_ping_thread(void* arg) {
 // INITIALIZATION
 // ============================================
 
-int client_init(p2p_client_t* client, const char* relay_host, uint16_t relay_port) {
+int client_init(p2p_client_t *client, const char *relay_host, uint16_t relay_port)
+{
     memset(client, 0, sizeof(p2p_client_t));
-    
+
     generate_client_id(client->id, sizeof(client->id));
     strncpy(client->relay_host, relay_host, sizeof(client->relay_host) - 1);
     client->relay_port = relay_port;
@@ -168,9 +278,12 @@ int client_init(p2p_client_t* client, const char* relay_host, uint16_t relay_por
     client->connected = false;
     client->in_group = false;
     client->has_pending_vote = false;
-    
+
     pthread_mutex_init(&client->send_mutex, NULL);
-    
+
+    nat_manager_init(&client->nat_mgr, relay_host, relay_port);
+    client->nat_mgr.local_nat.local_port = P2P_LISTEN_PORT_BASE + (getpid() % 1000);
+
     LOG_INFO("Client initialized: %s", client->id);
     return 0;
 }
@@ -179,52 +292,58 @@ int client_init(p2p_client_t* client, const char* relay_host, uint16_t relay_por
 // CONNECTION
 // ============================================
 
-int client_connect(p2p_client_t* client) {
+int client_connect(p2p_client_t *client)
+{
     LOG_INFO("Connecting to relay %s:%d...", client->relay_host, client->relay_port);
-    
+
     client->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (client->socket_fd < 0) {
+    if (client->socket_fd < 0)
+    {
         LOG_ERROR("Failed to create socket: %s", strerror(errno));
         return -1;
     }
-    
-    struct hostent* host = gethostbyname(client->relay_host);
-    if (!host) {
+
+    struct hostent *host = gethostbyname(client->relay_host);
+    if (!host)
+    {
         LOG_ERROR("Failed to resolve host: %s", client->relay_host);
         close(client->socket_fd);
         client->socket_fd = -1;
         return -1;
     }
-    
+
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(client->relay_port);
     memcpy(&addr.sin_addr, host->h_addr_list[0], host->h_length);
-    
-    if (connect(client->socket_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+
+    if (connect(client->socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+    {
         LOG_ERROR("Failed to connect: %s", strerror(errno));
         close(client->socket_fd);
         client->socket_fd = -1;
         return -1;
     }
-    
+
     client->connected = true;
     LOG_INFO("Connected to relay!");
-    
+
     // Start receive thread
     client->recv_thread_running = true;
-    if (pthread_create(&client->recv_thread, NULL, client_recv_thread, client) != 0) {
+    if (pthread_create(&client->recv_thread, NULL, client_recv_thread, client) != 0)
+    {
         LOG_ERROR("Failed to create receive thread");
         close(client->socket_fd);
         client->socket_fd = -1;
         client->connected = false;
         return -1;
     }
-    
+
     // Start auto-ping thread
     client->ping_thread_running = true;
-    if (pthread_create(&client->ping_thread, NULL, client_ping_thread, client) != 0) {
+    if (pthread_create(&client->ping_thread, NULL, client_ping_thread, client) != 0)
+    {
         LOG_ERROR("Failed to create ping thread");
         client->recv_thread_running = false;
         pthread_join(client->recv_thread, NULL);
@@ -233,71 +352,86 @@ int client_connect(p2p_client_t* client) {
         client->connected = false;
         return -1;
     }
-    
+
     // Send CONNECT message
     message_t connect_msg;
     memset(&connect_msg, 0, sizeof(connect_msg));
     message_header_init(&connect_msg.header, MSG_CONNECT);
     strncpy(connect_msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
-    
-    payload_connect_t* payload = (payload_connect_t*)connect_msg.payload;
+
+    payload_connect_t *payload = (payload_connect_t *)connect_msg.payload;
     strncpy(payload->client_id, client->id, MAX_ID_LENGTH - 1);
-    snprintf(payload->client_version, sizeof(payload->client_version), 
+    snprintf(payload->client_version, sizeof(payload->client_version),
              "%d.%d.%d", P2P_VERSION_MAJOR, P2P_VERSION_MINOR, P2P_VERSION_PATCH);
     payload->listen_port = 0;
-    
+
     connect_msg.header.payload_length = sizeof(payload_connect_t);
-    
-    if (client_send_message(client, &connect_msg) != 0) {
+
+    if (client_send_message(client, &connect_msg) != 0)
+    {
         LOG_ERROR("Failed to send CONNECT message");
         client_disconnect(client);
         return -1;
     }
-    
+    else
+    {
+        LOG_INFO("CONNECT message sent");
+    }
+
+    client_nat_discover(client);
+
     LOG_INFO("CONNECT message sent");
     return 0;
 }
 
-void client_disconnect(p2p_client_t* client) {
-    if (!client->connected) return;
-    
+void client_disconnect(p2p_client_t *client)
+{
+    if (!client->connected)
+        return;
+
     LOG_INFO("Disconnecting from relay...");
-    
+
     // Leave group if in one
-    if (client->in_group) {
+    if (client->in_group)
+    {
         client_leave_group(client);
     }
-    
+
     // Send DISCONNECT message
     message_t disconnect_msg;
     memset(&disconnect_msg, 0, sizeof(disconnect_msg));
     message_header_init(&disconnect_msg.header, MSG_DISCONNECT);
     strncpy(disconnect_msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
     client_send_message(client, &disconnect_msg);
-    
+
     // Stop threads
     client->recv_thread_running = false;
     client->ping_thread_running = false;
     client->connected = false;
-    
-    if (client->socket_fd > 0) {
+
+    if (client->socket_fd > 0)
+    {
         shutdown(client->socket_fd, SHUT_RDWR);
         close(client->socket_fd);
         client->socket_fd = -1;
     }
-    
+
     pthread_join(client->recv_thread, NULL);
     pthread_join(client->ping_thread, NULL);
-    
+
     LOG_INFO("Disconnected");
 }
 
-void client_cleanup(p2p_client_t* client) {
-    if (client->connected) {
+void client_cleanup(p2p_client_t *client)
+{
+    if (client->connected)
+    {
         client_disconnect(client);
     }
+
+    nat_manager_cleanup(&client->nat_mgr);
     pthread_mutex_destroy(&client->send_mutex);
-    
+
     LOG_INFO("Client cleanup complete");
     LOG_INFO("Statistics: %lu msgs sent, %lu msgs received, %lu bytes sent, %lu bytes received",
              client->messages_sent, client->messages_received,
@@ -308,7 +442,8 @@ void client_cleanup(p2p_client_t* client) {
 // STATE
 // ============================================
 
-bool client_is_connected(p2p_client_t* client) {
+bool client_is_connected(p2p_client_t *client)
+{
     return client->connected;
 }
 
@@ -316,44 +451,48 @@ bool client_is_connected(p2p_client_t* client) {
 // MESSAGING
 // ============================================
 
-int client_send_message(p2p_client_t* client, message_t* msg) {
-    if (!client->connected) {
+int client_send_message(p2p_client_t *client, message_t *msg)
+{
+    if (!client->connected)
+    {
         LOG_WARN("Cannot send message: not connected");
         return -1;
     }
-    
+
     pthread_mutex_lock(&client->send_mutex);
-    
+
     size_t total_size = message_total_size(msg);
     ssize_t sent = send(client->socket_fd, msg, total_size, 0);
-    
+
     pthread_mutex_unlock(&client->send_mutex);
-    
-    if (sent < 0) {
+
+    if (sent < 0)
+    {
         LOG_ERROR("Send failed: %s", strerror(errno));
         return -1;
     }
-    
+
     client->bytes_sent += sent;
     client->messages_sent++;
-    
+
     LOG_TRACE("Sent %zd bytes (%s)", sent, message_type_string(msg->header.type));
     return 0;
 }
 
-int client_send_ping(p2p_client_t* client) {
+int client_send_ping(p2p_client_t *client)
+{
     message_t ping;
     memset(&ping, 0, sizeof(ping));
     message_header_init(&ping.header, MSG_PING);
     strncpy(ping.header.sender_id, client->id, MAX_ID_LENGTH - 1);
-    
-    payload_ping_t* payload = (payload_ping_t*)ping.payload;
+
+    payload_ping_t *payload = (payload_ping_t *)ping.payload;
     payload->ping_time = get_timestamp_ms();
     payload->ping_id = ++client->ping_counter;
     ping.header.payload_length = sizeof(payload_ping_t);
-    
+
     client->last_ping_sent = payload->ping_time;
-    
+
     LOG_DEBUG("Sending PING (id: %u)", payload->ping_id);
     return client_send_message(client, &ping);
 }
@@ -362,128 +501,251 @@ int client_send_ping(p2p_client_t* client) {
 // GROUP OPERATIONS (Phase 2)
 // ============================================
 
-int client_create_group(p2p_client_t* client, const char* group_name) {
-    if (client->in_group) {
+int client_create_group(p2p_client_t *client, const char *group_name)
+{
+    if (client->in_group)
+    {
         LOG_WARN("Already in a group. Leave first.");
         return -1;
     }
-    
+
     LOG_INFO("Creating group: %s", group_name);
-    
+
     message_t msg;
     memset(&msg, 0, sizeof(msg));
     message_header_init(&msg.header, MSG_GROUP_CREATE);
     strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
-    
-    payload_group_create_t* payload = (payload_group_create_t*)msg.payload;
+
+    payload_group_create_t *payload = (payload_group_create_t *)msg.payload;
     strncpy(payload->group_name, group_name, MAX_GROUP_NAME - 1);
     msg.header.payload_length = sizeof(payload_group_create_t);
-    
+
     return client_send_message(client, &msg);
 }
 
-int client_join_group(p2p_client_t* client, const char* invite_token) {
-    if (client->in_group) {
+int client_join_group(p2p_client_t *client, const char *invite_token)
+{
+    if (client->in_group)
+    {
         LOG_WARN("Already in a group. Leave first.");
         return -1;
     }
-    
+
     LOG_INFO("Joining group with token: %s", invite_token);
-    
+
     message_t msg;
     memset(&msg, 0, sizeof(msg));
     message_header_init(&msg.header, MSG_GROUP_JOIN);
     strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
-    
-    payload_group_join_t* payload = (payload_group_join_t*)msg.payload;
+
+    payload_group_join_t *payload = (payload_group_join_t *)msg.payload;
     strncpy(payload->invite_token, invite_token, INVITE_TOKEN_LENGTH - 1);
     msg.header.payload_length = sizeof(payload_group_join_t);
-    
+
     return client_send_message(client, &msg);
 }
 
-int client_leave_group(p2p_client_t* client) {
-    if (!client->in_group) {
+int client_leave_group(p2p_client_t *client)
+{
+    if (!client->in_group)
+    {
         LOG_WARN("Not in a group.");
         return -1;
     }
-    
+
     LOG_INFO("Leaving group: %s", client->group_id);
-    
+
     message_t msg;
     memset(&msg, 0, sizeof(msg));
     message_header_init(&msg.header, MSG_GROUP_LEAVE);
     strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
-    
-    payload_group_leave_t* payload = (payload_group_leave_t*)msg.payload;
+
+    payload_group_leave_t *payload = (payload_group_leave_t *)msg.payload;
     strncpy(payload->group_id, client->group_id, MAX_ID_LENGTH - 1);
     msg.header.payload_length = sizeof(payload_group_leave_t);
-    
+
     int result = client_send_message(client, &msg);
-    
+
     // Clear local state
     memset(client->group_id, 0, sizeof(client->group_id));
     memset(client->group_name, 0, sizeof(client->group_name));
     memset(client->invite_token, 0, sizeof(client->invite_token));
     client->in_group = false;
-    
+
     return result;
 }
 
-int client_vote(p2p_client_t* client, bool approve) {
-    if (!client->has_pending_vote) {
+int client_vote(p2p_client_t *client, bool approve)
+{
+    if (!client->has_pending_vote)
+    {
         LOG_WARN("No pending vote request.");
         return -1;
     }
-    
+
     LOG_INFO("Voting %s for %s", approve ? "YES" : "NO", client->pending_vote_requester);
-    
+
     message_t msg;
     memset(&msg, 0, sizeof(msg));
     message_header_init(&msg.header, MSG_GROUP_VOTE);
     strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
-    
-    payload_group_vote_t* payload = (payload_group_vote_t*)msg.payload;
+
+    payload_group_vote_t *payload = (payload_group_vote_t *)msg.payload;
     strncpy(payload->group_id, client->pending_vote_group, MAX_ID_LENGTH - 1);
     strncpy(payload->request_id, client->pending_vote_request_id, MAX_ID_LENGTH - 1);
     strncpy(payload->requester_id, client->pending_vote_requester, MAX_ID_LENGTH - 1);
     payload->approved = approve ? 1 : 0;
     msg.header.payload_length = sizeof(payload_group_vote_t);
-    
+
     // Clear pending vote
     client->has_pending_vote = false;
     memset(client->pending_vote_request_id, 0, sizeof(client->pending_vote_request_id));
     memset(client->pending_vote_requester, 0, sizeof(client->pending_vote_requester));
     memset(client->pending_vote_group, 0, sizeof(client->pending_vote_group));
-    
+
     return client_send_message(client, &msg);
 }
 
-int client_request_invite(p2p_client_t* client) {
-    if (!client->in_group) {
+int client_request_invite(p2p_client_t *client)
+{
+    if (!client->in_group)
+    {
         LOG_WARN("Not in a group.");
         return -1;
     }
-    
+
     LOG_INFO("Requesting new invite token");
-    
+
     message_t msg;
     memset(&msg, 0, sizeof(msg));
     message_header_init(&msg.header, MSG_GROUP_INVITE);
     strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
-    
-    payload_invite_request_t* payload = (payload_invite_request_t*)msg.payload;
+
+    payload_invite_request_t *payload = (payload_invite_request_t *)msg.payload;
     strncpy(payload->group_id, client->group_id, MAX_ID_LENGTH - 1);
     msg.header.payload_length = sizeof(payload_invite_request_t);
-    
+
     return client_send_message(client, &msg);
+}
+
+int client_announce_file(p2p_client_t *client, shared_file_t *file)
+{
+    if (!client || !client->connected || !client->in_group)
+    {
+        LOG_WARN("Cannot announce file: not connected or not in group");
+        return -1;
+    }
+
+    message_t msg;
+    memset(&msg, 0, sizeof(msg));
+    message_header_init(&msg.header, MSG_FILE_ANNOUNCE);
+    strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+
+    payload_file_announce_t *payload = (payload_file_announce_t *)msg.payload;
+    memcpy(payload->file_hash, file->metadata.file_hash, FILE_HASH_SIZE);
+    strncpy(payload->filename, file->metadata.filename, MAX_FILENAME - 1);
+    payload->file_size = file->metadata.file_size;
+    payload->chunk_count = file->metadata.chunk_count;
+    strncpy(payload->group_id, client->group_id, MAX_ID_LENGTH - 1);
+
+    msg.header.payload_length = sizeof(payload_file_announce_t);
+
+    char hash_hex[65];
+    hash_to_hex(file->metadata.file_hash, hash_hex, sizeof(hash_hex));
+    LOG_INFO("Announcing file to group: %s (hash: %.16s...)",
+             file->metadata.filename, hash_hex);
+
+    return client_send_message(client, &msg);
+}
+
+int client_request_file_list(p2p_client_t *client)
+{
+    if (!client || !client->connected || !client->in_group)
+    {
+        LOG_WARN("Cannot request file list: not connected or not in group");
+        return -1;
+    }
+
+    message_t msg;
+    memset(&msg, 0, sizeof(msg));
+    message_header_init(&msg.header, MSG_FILE_LIST);
+    strncpy(msg.header.sender_id, client->id, MAX_ID_LENGTH - 1);
+
+    payload_file_list_request_t *payload = (payload_file_list_request_t *)msg.payload;
+    strncpy(payload->group_id, client->group_id, MAX_ID_LENGTH - 1);
+
+    msg.header.payload_length = sizeof(payload_file_list_request_t);
+
+    LOG_INFO("Requesting file list for group: %s", client->group_id);
+
+    return client_send_message(client, &msg);
+}
+
+// ============================================
+// NAT OPERATIONS (Phase 4)
+// ============================================
+
+int client_nat_discover(p2p_client_t* client) {
+    if (!client->connected) {
+        LOG_WARN("NAT: Not connected to relay");
+        return -1;
+    }
+    return nat_discover(&client->nat_mgr, client->socket_fd);
+}
+
+int client_nat_punch(p2p_client_t* client, const char* peer_id) {
+    if (!client->connected) {
+        LOG_WARN("NAT: Not connected to relay");
+        return -1;
+    }
+    return nat_punch_to_peer(&client->nat_mgr, client->socket_fd,
+                              peer_id, client->id);
+}
+
+int client_connect_to_peer(p2p_client_t* client, const char* peer_id,
+                           const char* peer_ip, uint16_t peer_port) {
+    // First check if we already have a NAT-punched connection
+    int existing_fd = nat_get_peer_connection(&client->nat_mgr, peer_id);
+    if (existing_fd >= 0) {
+        LOG_INFO("NAT: Reusing existing connection to %s (fd=%d)", peer_id, existing_fd);
+        return existing_fd;
+    }
+    
+    // Try direct connection first (works on LAN or public IPs)
+    LOG_DEBUG("NAT: Trying direct connect to %s:%d...", peer_ip, peer_port);
+    int fd = nat_try_connect(peer_ip, peer_port, 0, PUNCH_CONNECT_TIMEOUT_MS);
+    
+    if (fd >= 0) {
+        LOG_INFO("NAT: Direct connection to %s:%d succeeded", peer_ip, peer_port);
+        return fd;
+    }
+    
+    // Direct failed — initiate NAT punch via relay
+    LOG_INFO("NAT: Direct connection failed, initiating hole punch for %s...", peer_id);
+    int punch_result = client_nat_punch(client, peer_id);
+    
+    if (punch_result >= 0) {
+        // Wait for punch to complete (up to 10 seconds)
+        for (int i = 0; i < 50; i++) {
+            usleep(200 * 1000);
+            fd = nat_get_peer_connection(&client->nat_mgr, peer_id);
+            if (fd >= 0) {
+                LOG_INFO("NAT: Hole punch succeeded for %s!", peer_id);
+                return fd;
+            }
+        }
+    }
+    
+    LOG_WARN("NAT: All connection methods failed for %s", peer_id);
+    return -1;
 }
 
 // ============================================
 // CALLBACKS
 // ============================================
 
-void client_set_message_callback(p2p_client_t* client, message_callback_t callback, void* user_data) {
+void client_set_message_callback(p2p_client_t *client, message_callback_t callback, void *user_data)
+{
     client->on_message = callback;
     client->callback_user_data = user_data;
 }

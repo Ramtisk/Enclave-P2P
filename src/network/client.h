@@ -4,8 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "../common/config.h"
 #include "../common/protocol.h"
+#include "../transfer/p2p_transfer.h"
+#include "nat_traversal/nat_traversal.h"
 
 // ============================================
 // CALLBACK TYPES
@@ -53,18 +54,25 @@ typedef struct {
     char pending_vote_group[MAX_ID_LENGTH];
     bool has_pending_vote;
     
+    // File transfer (Phase 3)
+    file_manager_t file_mgr;
+    p2p_server_t p2p_server;
+    uint16_t p2p_listen_port;
+    
+    // NAT Traversal (Phase 4)
+    nat_manager_t nat_mgr;
+    
     // Statistics
     uint64_t messages_sent;
     uint64_t messages_received;
     uint64_t bytes_sent;
     uint64_t bytes_received;
+
 } p2p_client_t;
 
 // ============================================
-// FUNCTIONS
+// LIFECYCLE FUNCTIONS
 // ============================================
-
-// Lifecycle
 int  client_init(p2p_client_t* client, const char* relay_host, uint16_t relay_port);
 int  client_connect(p2p_client_t* client);
 void client_disconnect(p2p_client_t* client);
@@ -83,6 +91,15 @@ int client_join_group(p2p_client_t* client, const char* invite_token);
 int client_leave_group(p2p_client_t* client);
 int client_vote(p2p_client_t* client, bool approve);
 int client_request_invite(p2p_client_t* client);
+
+// File operations (Phase 3)
+int client_announce_file(p2p_client_t* client, shared_file_t* file);
+int client_request_file_list(p2p_client_t* client);
+
+// NAT operations (Phase 4)
+int client_nat_discover(p2p_client_t* client);
+int client_nat_punch(p2p_client_t* client, const char* peer_id);
+int client_connect_to_peer(p2p_client_t* client, const char* peer_id, const char* peer_ip, uint16_t peer_port);
 
 // Callbacks
 void client_set_message_callback(p2p_client_t* client, message_callback_t callback, void* user_data);

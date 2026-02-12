@@ -76,8 +76,13 @@ int relay_handle_group_leave(relay_server_t* server, int client_index, message_t
 int relay_handle_group_invite(relay_server_t* server, int client_index, message_t* msg);
 
 // Group utilities
-int relay_send_vote_request_to_members(relay_server_t* server, group_t* group, 
-                                       pending_join_t* pending);
+int relay_send_vote_request_to_members(relay_server_t* server, group_t* group, pending_join_t* pending);
 int relay_send_group_info(relay_server_t* server, int client_index, group_t* group);
+
+// NAT traversal handlers (Phase 4)
+int relay_handle_nat_discover(relay_server_t* server, int client_index, message_t* msg);
+int relay_handle_nat_punch_req(relay_server_t* server, int client_index, message_t* msg);
+int relay_handle_nat_punch_result(relay_server_t* server, int client_index, message_t* msg);
+int relay_handle_nat_relay_data(relay_server_t* server, int client_index, message_t* msg);
 
 #endif // P2P_RELAY_H
