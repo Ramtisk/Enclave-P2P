@@ -5,11 +5,11 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "../../src/common/config.h"
-#include "../../src/common/logging.h"
-#include "../../src/network/client.h"
-#include "../../src/transfer/chunking.h"
-#include "../../src/transfer/p2p_transfer.h"
+#include "common/config.h"
+#include "common/logging.h"
+#include "network/client/client.h"
+#include "transfer/chunking.h"
+#include "transfer/p2p_transfer.h"
 
 static p2p_client_t g_client;
 static volatile int g_running = 1;
@@ -35,9 +35,8 @@ void on_message_received(message_t *msg, void *user_data)
             payload_group_created_t *created = (payload_group_created_t *)msg->payload;
             if (strlen(created->group_id) > 0)
             {
-                strncpy(g_client.group_id, created->group_id, MAX_ID_LENGTH - 1);
-                strncpy(g_client.invite_token, created->invite_token,
-                        INVITE_TOKEN_LENGTH - 1);
+                strncpy(g_client.group_id, created->group_id, MAX_ID_LENGTH - 1); // last for \0 
+                strncpy(g_client.invite_token, created->invite_token,INVITE_TOKEN_LENGTH - 1);
                 g_client.in_group = true;
 
                 printf("\n");

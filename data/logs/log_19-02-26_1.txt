@@ -1,0 +1,262 @@
+[2026-02-19 22:37:21] INFO  main.c:52: ========================================
+[2026-02-19 22:37:21] INFO  main.c:53:   P2P Relay Server v0.3.0
+[2026-02-19 22:37:21] INFO  main.c:55: ========================================
+[2026-02-19 22:37:21] INFO  group_manager.c:28: Group manager initialized
+[2026-02-19 22:37:21] INFO  relay.c:91: Relay initialized on port 5000
+[2026-02-19 22:37:21] INFO  main.c:67: Press Ctrl+C to stop
+[2026-02-19 22:37:21] INFO  relay.c:109: Relay starting main loop...
+[2026-02-19 22:37:44] INFO  relay.c:293: New client: client_1_4292 (127.0.0.1:44208) [slot 0] [total: 1]
+[2026-02-19 22:37:44] DEBUG relay_dispatch.c:15: Message type CONNECT from client client_1_4292
+[2026-02-19 22:37:44] INFO  relay_handlers_basic.c:45: Client peer_40265_64291 authenticated (version: 0.3.0, listen_port: 0)
+[2026-02-19 22:37:44] DEBUG relay_dispatch.c:15: Message type NAT_DISCOVER from client peer_40265_64291
+[2026-02-19 22:37:44] INFO  relay_handlers_nat.c:11: NAT: Discovery request from peer_40265_64291 (public: 127.0.0.1:44208)
+[2026-02-19 22:37:49] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:37:49] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 1), sending PONG
+[2026-02-19 22:37:54] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:37:54] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 2), sending PONG
+[2026-02-19 22:37:59] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:37:59] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 3), sending PONG
+[2026-02-19 22:37:59] INFO  relay.c:293: New client: client_2_9831 (127.0.0.1:54786) [slot 1] [total: 2]
+[2026-02-19 22:37:59] DEBUG relay_dispatch.c:15: Message type CONNECT from client client_2_9831
+[2026-02-19 22:37:59] INFO  relay_handlers_basic.c:45: Client peer_40309_79830 authenticated (version: 0.3.0, listen_port: 0)
+[2026-02-19 22:37:59] DEBUG relay_dispatch.c:15: Message type NAT_DISCOVER from client peer_40309_79830
+[2026-02-19 22:37:59] INFO  relay_handlers_nat.c:11: NAT: Discovery request from peer_40309_79830 (public: 127.0.0.1:54786)
+[2026-02-19 22:38:03] INFO  relay.c:293: New client: client_3_3913 (127.0.0.1:42170) [slot 2] [total: 3]
+[2026-02-19 22:38:03] DEBUG relay_dispatch.c:15: Message type CONNECT from client client_3_3913
+[2026-02-19 22:38:03] INFO  relay_handlers_basic.c:45: Client peer_40313_83912 authenticated (version: 0.3.0, listen_port: 0)
+[2026-02-19 22:38:03] DEBUG relay_dispatch.c:15: Message type NAT_DISCOVER from client peer_40313_83912
+[2026-02-19 22:38:03] INFO  relay_handlers_nat.c:11: NAT: Discovery request from peer_40313_83912 (public: 127.0.0.1:42170)
+[2026-02-19 22:38:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:04] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 4), sending PONG
+[2026-02-19 22:38:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:04] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 1), sending PONG
+[2026-02-19 22:38:08] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:08] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 1), sending PONG
+[2026-02-19 22:38:09] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:09] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 5), sending PONG
+[2026-02-19 22:38:09] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:09] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 2), sending PONG
+[2026-02-19 22:38:13] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:13] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 2), sending PONG
+[2026-02-19 22:38:14] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:14] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 6), sending PONG
+[2026-02-19 22:38:14] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:14] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 3), sending PONG
+[2026-02-19 22:38:18] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:18] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 3), sending PONG
+[2026-02-19 22:38:19] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:19] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 7), sending PONG
+[2026-02-19 22:38:19] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:19] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 4), sending PONG
+[2026-02-19 22:38:23] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:23] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 4), sending PONG
+[2026-02-19 22:38:24] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:24] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 8), sending PONG
+[2026-02-19 22:38:24] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:24] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 5), sending PONG
+[2026-02-19 22:38:28] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:28] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 5), sending PONG
+[2026-02-19 22:38:29] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:29] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 9), sending PONG
+[2026-02-19 22:38:29] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:29] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 6), sending PONG
+[2026-02-19 22:38:33] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:33] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 6), sending PONG
+[2026-02-19 22:38:34] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:34] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 10), sending PONG
+[2026-02-19 22:38:34] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:34] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 7), sending PONG
+[2026-02-19 22:38:38] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:38] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 7), sending PONG
+[2026-02-19 22:38:39] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:39] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 11), sending PONG
+[2026-02-19 22:38:39] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:39] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 8), sending PONG
+[2026-02-19 22:38:43] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:43] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 8), sending PONG
+[2026-02-19 22:38:44] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:44] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 12), sending PONG
+[2026-02-19 22:38:44] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:44] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 9), sending PONG
+[2026-02-19 22:38:48] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:48] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 9), sending PONG
+[2026-02-19 22:38:49] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:49] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 13), sending PONG
+[2026-02-19 22:38:49] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:49] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 10), sending PONG
+[2026-02-19 22:38:53] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:53] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 10), sending PONG
+[2026-02-19 22:38:54] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:54] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 14), sending PONG
+[2026-02-19 22:38:54] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:54] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 11), sending PONG
+[2026-02-19 22:38:58] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:38:58] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 11), sending PONG
+[2026-02-19 22:38:59] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:38:59] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 15), sending PONG
+[2026-02-19 22:38:59] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:38:59] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 12), sending PONG
+[2026-02-19 22:39:03] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:03] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 12), sending PONG
+[2026-02-19 22:39:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:04] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 16), sending PONG
+[2026-02-19 22:39:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:04] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 13), sending PONG
+[2026-02-19 22:39:08] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:08] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 13), sending PONG
+[2026-02-19 22:39:09] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:09] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 17), sending PONG
+[2026-02-19 22:39:09] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:09] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 14), sending PONG
+[2026-02-19 22:39:13] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:13] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 14), sending PONG
+[2026-02-19 22:39:14] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:14] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 18), sending PONG
+[2026-02-19 22:39:14] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:14] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 15), sending PONG
+[2026-02-19 22:39:18] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:18] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 15), sending PONG
+[2026-02-19 22:39:19] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:19] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 19), sending PONG
+[2026-02-19 22:39:19] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:19] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 16), sending PONG
+[2026-02-19 22:39:23] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:23] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 16), sending PONG
+[2026-02-19 22:39:24] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:24] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 20), sending PONG
+[2026-02-19 22:39:24] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:24] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 17), sending PONG
+[2026-02-19 22:39:28] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:28] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 17), sending PONG
+[2026-02-19 22:39:29] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:29] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 21), sending PONG
+[2026-02-19 22:39:29] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:29] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 18), sending PONG
+[2026-02-19 22:39:33] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:33] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 18), sending PONG
+[2026-02-19 22:39:34] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:34] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 22), sending PONG
+[2026-02-19 22:39:34] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:34] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 19), sending PONG
+[2026-02-19 22:39:38] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:38] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 19), sending PONG
+[2026-02-19 22:39:39] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:39] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 23), sending PONG
+[2026-02-19 22:39:39] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:39] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 20), sending PONG
+[2026-02-19 22:39:43] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:43] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 20), sending PONG
+[2026-02-19 22:39:44] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:44] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 24), sending PONG
+[2026-02-19 22:39:44] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:44] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 21), sending PONG
+[2026-02-19 22:39:48] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:48] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 21), sending PONG
+[2026-02-19 22:39:49] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:49] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 25), sending PONG
+[2026-02-19 22:39:49] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:49] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 22), sending PONG
+[2026-02-19 22:39:53] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:53] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 22), sending PONG
+[2026-02-19 22:39:54] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:54] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 26), sending PONG
+[2026-02-19 22:39:54] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:54] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 23), sending PONG
+[2026-02-19 22:39:58] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:39:58] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 23), sending PONG
+[2026-02-19 22:39:59] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:39:59] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 27), sending PONG
+[2026-02-19 22:39:59] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:39:59] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 24), sending PONG
+[2026-02-19 22:40:03] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:03] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 24), sending PONG
+[2026-02-19 22:40:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:04] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 28), sending PONG
+[2026-02-19 22:40:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:04] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 25), sending PONG
+[2026-02-19 22:40:08] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:08] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 25), sending PONG
+[2026-02-19 22:40:09] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:09] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 29), sending PONG
+[2026-02-19 22:40:09] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:09] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 26), sending PONG
+[2026-02-19 22:40:13] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:13] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 26), sending PONG
+[2026-02-19 22:40:14] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:14] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 30), sending PONG
+[2026-02-19 22:40:14] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:14] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 27), sending PONG
+[2026-02-19 22:40:18] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:18] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 27), sending PONG
+[2026-02-19 22:40:19] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:19] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 31), sending PONG
+[2026-02-19 22:40:19] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:19] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 28), sending PONG
+[2026-02-19 22:40:23] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:23] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 28), sending PONG
+[2026-02-19 22:40:24] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:24] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 32), sending PONG
+[2026-02-19 22:40:24] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:24] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 29), sending PONG
+[2026-02-19 22:40:28] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:28] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 29), sending PONG
+[2026-02-19 22:40:29] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:29] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 33), sending PONG
+[2026-02-19 22:40:29] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:29] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 30), sending PONG
+[2026-02-19 22:40:33] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:33] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 30), sending PONG
+[2026-02-19 22:40:34] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:34] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 34), sending PONG
+[2026-02-19 22:40:34] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:34] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 31), sending PONG
+[2026-02-19 22:40:38] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:38] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 31), sending PONG
+[2026-02-19 22:40:39] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:39] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 35), sending PONG
+[2026-02-19 22:40:39] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:39] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 32), sending PONG
+[2026-02-19 22:40:43] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:43] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 32), sending PONG
+[2026-02-19 22:40:44] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:44] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 36), sending PONG
+[2026-02-19 22:40:44] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:44] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 33), sending PONG
+[2026-02-19 22:40:48] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:48] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 33), sending PONG
+[2026-02-19 22:40:49] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:49] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 37), sending PONG
+[2026-02-19 22:40:49] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:49] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 34), sending PONG
+[2026-02-19 22:40:53] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:53] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 34), sending PONG
+[2026-02-19 22:40:54] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:54] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 38), sending PONG
+[2026-02-19 22:40:54] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:54] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 35), sending PONG
+[2026-02-19 22:40:58] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:40:58] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 35), sending PONG
+[2026-02-19 22:40:59] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:40:59] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 39), sending PONG
+[2026-02-19 22:40:59] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:40:59] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 36), sending PONG
+[2026-02-19 22:41:03] DEBUG relay_dispatch.c:15: Message type PING from client peer_40313_83912
+[2026-02-19 22:41:03] DEBUG relay_handlers_basic.c:28: PING from peer_40313_83912 (id: 36), sending PONG
+[2026-02-19 22:41:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40265_64291
+[2026-02-19 22:41:04] DEBUG relay_handlers_basic.c:28: PING from peer_40265_64291 (id: 40), sending PONG
+[2026-02-19 22:41:04] DEBUG relay_dispatch.c:15: Message type PING from client peer_40309_79830
+[2026-02-19 22:41:04] DEBUG relay_handlers_basic.c:28: PING from peer_40309_79830 (id: 37), sending PONG
+[2026-02-19 22:41:06] DEBUG relay_dispatch.c:15: Message type DISCONNECT from client peer_40265_64291
+[2026-02-19 22:41:06] INFO  relay.c:314: Disconnecting client peer_40265_64291
+[2026-02-19 22:41:06] INFO  relay.c:332: Active clients: 2
+[2026-02-19 22:41:07] DEBUG relay_dispatch.c:15: Message type DISCONNECT from client peer_40313_83912
+[2026-02-19 22:41:07] INFO  relay.c:314: Disconnecting client peer_40313_83912
+[2026-02-19 22:41:07] INFO  relay.c:332: Active clients: 1
+[2026-02-19 22:41:08] DEBUG relay_dispatch.c:15: Message type DISCONNECT from client peer_40309_79830
+[2026-02-19 22:41:08] INFO  relay.c:314: Disconnecting client peer_40309_79830
+[2026-02-19 22:41:08] INFO  relay.c:332: Active clients: 0
+[2026-02-19 22:41:09] INFO  main.c:15: Signal received, shutting down...
+[2026-02-19 22:41:09] INFO  relay.c:203: Stopping relay...
+[2026-02-19 22:41:09] INFO  group_manager.c:56: Group manager cleanup complete
+[2026-02-19 22:41:09] INFO  relay.c:229: Relay cleanup complete
+[2026-02-19 22:41:09] INFO  relay.c:230: Statistics: 122 messages, 19115 bytes sent, 20000 bytes received

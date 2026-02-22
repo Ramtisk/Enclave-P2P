@@ -1,0 +1,147 @@
+[2026-02-19 22:37:44] INFO  main.c:367: ========================================
+[2026-02-19 22:37:44] INFO  main.c:368:   P2P Client v0.3.0
+[2026-02-19 22:37:44] INFO  main.c:370: ========================================
+[2026-02-19 22:37:44] INFO  nat_traversal.c:71: NAT manager initialized (local IP: 192.168.1.143)
+[2026-02-19 22:37:44] INFO  client.c:47: Client initialized: peer_40265_64291
+[2026-02-19 22:37:44] INFO  main.c:391: P2P server listening on port 7265
+[2026-02-19 22:37:44] INFO  client.c:52: Connecting to relay 127.0.0.1:5000...
+[2026-02-19 22:37:44] INFO  client.c:82: Connected to relay!
+[2026-02-19 22:37:44] DEBUG client_recv.c:198: Auto-ping thread started (interval: 5000 ms)
+[2026-02-19 22:37:44] INFO  nat_discovery.c:64: NAT: Sending discovery request to relay...
+[2026-02-19 22:37:44] INFO  client.c:127: CONNECT message sent
+[2026-02-19 22:37:44] DEBUG client_recv.c:36: Receive thread started
+[2026-02-19 22:37:44] DEBUG client_recv.c:64: Received ACK from relay
+[2026-02-19 22:37:44] INFO  main.c:54: Received ACK from relay
+[2026-02-19 22:37:44] DEBUG client_recv.c:64: Received NAT_INFO from relay
+[2026-02-19 22:37:44] INFO  nat_discovery.c:178: NAT: Info set from relay: 127.0.0.1:44208 (type: Restricted Cone)
+[2026-02-19 22:37:44] INFO  client_recv.c:153: NAT: Public endpoint discovered: 127.0.0.1:44208 (type: Restricted Cone)
+[2026-02-19 22:37:44] DEBUG main.c:61: Received message: type=NAT_INFO from=relay
+[2026-02-19 22:37:49] DEBUG client_messaging.c:50: Sending PING (id: 1)
+[2026-02-19 22:37:49] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:37:49] DEBUG client_recv.c:72: PONG received (id: 1, RTT: 1 ms)
+[2026-02-19 22:37:54] DEBUG client_messaging.c:50: Sending PING (id: 2)
+[2026-02-19 22:37:54] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:37:54] DEBUG client_recv.c:72: PONG received (id: 2, RTT: 0 ms)
+[2026-02-19 22:37:59] DEBUG client_messaging.c:50: Sending PING (id: 3)
+[2026-02-19 22:37:59] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:37:59] DEBUG client_recv.c:72: PONG received (id: 3, RTT: 1 ms)
+[2026-02-19 22:38:04] DEBUG client_messaging.c:50: Sending PING (id: 4)
+[2026-02-19 22:38:04] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:04] DEBUG client_recv.c:72: PONG received (id: 4, RTT: 1 ms)
+[2026-02-19 22:38:09] DEBUG client_messaging.c:50: Sending PING (id: 5)
+[2026-02-19 22:38:09] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:09] DEBUG client_recv.c:72: PONG received (id: 5, RTT: 0 ms)
+[2026-02-19 22:38:14] DEBUG client_messaging.c:50: Sending PING (id: 6)
+[2026-02-19 22:38:14] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:14] DEBUG client_recv.c:72: PONG received (id: 6, RTT: 1 ms)
+[2026-02-19 22:38:19] DEBUG client_messaging.c:50: Sending PING (id: 7)
+[2026-02-19 22:38:19] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:19] DEBUG client_recv.c:72: PONG received (id: 7, RTT: 0 ms)
+[2026-02-19 22:38:24] DEBUG client_messaging.c:50: Sending PING (id: 8)
+[2026-02-19 22:38:24] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:24] DEBUG client_recv.c:72: PONG received (id: 8, RTT: 0 ms)
+[2026-02-19 22:38:29] DEBUG client_messaging.c:50: Sending PING (id: 9)
+[2026-02-19 22:38:29] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:29] DEBUG client_recv.c:72: PONG received (id: 9, RTT: 1 ms)
+[2026-02-19 22:38:34] DEBUG client_messaging.c:50: Sending PING (id: 10)
+[2026-02-19 22:38:34] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:34] DEBUG client_recv.c:72: PONG received (id: 10, RTT: 0 ms)
+[2026-02-19 22:38:39] DEBUG client_messaging.c:50: Sending PING (id: 11)
+[2026-02-19 22:38:39] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:39] DEBUG client_recv.c:72: PONG received (id: 11, RTT: 0 ms)
+[2026-02-19 22:38:44] DEBUG client_messaging.c:50: Sending PING (id: 12)
+[2026-02-19 22:38:44] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:44] DEBUG client_recv.c:72: PONG received (id: 12, RTT: 1 ms)
+[2026-02-19 22:38:49] DEBUG client_messaging.c:50: Sending PING (id: 13)
+[2026-02-19 22:38:49] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:49] DEBUG client_recv.c:72: PONG received (id: 13, RTT: 0 ms)
+[2026-02-19 22:38:54] DEBUG client_messaging.c:50: Sending PING (id: 14)
+[2026-02-19 22:38:54] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:54] DEBUG client_recv.c:72: PONG received (id: 14, RTT: 1 ms)
+[2026-02-19 22:38:59] DEBUG client_messaging.c:50: Sending PING (id: 15)
+[2026-02-19 22:38:59] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:38:59] DEBUG client_recv.c:72: PONG received (id: 15, RTT: 1 ms)
+[2026-02-19 22:39:04] DEBUG client_messaging.c:50: Sending PING (id: 16)
+[2026-02-19 22:39:04] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:04] DEBUG client_recv.c:72: PONG received (id: 16, RTT: 0 ms)
+[2026-02-19 22:39:09] DEBUG client_messaging.c:50: Sending PING (id: 17)
+[2026-02-19 22:39:09] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:09] DEBUG client_recv.c:72: PONG received (id: 17, RTT: 1 ms)
+[2026-02-19 22:39:14] DEBUG client_messaging.c:50: Sending PING (id: 18)
+[2026-02-19 22:39:14] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:14] DEBUG client_recv.c:72: PONG received (id: 18, RTT: 1 ms)
+[2026-02-19 22:39:19] DEBUG client_messaging.c:50: Sending PING (id: 19)
+[2026-02-19 22:39:19] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:19] DEBUG client_recv.c:72: PONG received (id: 19, RTT: 0 ms)
+[2026-02-19 22:39:24] DEBUG client_messaging.c:50: Sending PING (id: 20)
+[2026-02-19 22:39:24] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:24] DEBUG client_recv.c:72: PONG received (id: 20, RTT: 1 ms)
+[2026-02-19 22:39:29] DEBUG client_messaging.c:50: Sending PING (id: 21)
+[2026-02-19 22:39:29] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:29] DEBUG client_recv.c:72: PONG received (id: 21, RTT: 1 ms)
+[2026-02-19 22:39:34] DEBUG client_messaging.c:50: Sending PING (id: 22)
+[2026-02-19 22:39:34] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:34] DEBUG client_recv.c:72: PONG received (id: 22, RTT: 0 ms)
+[2026-02-19 22:39:39] DEBUG client_messaging.c:50: Sending PING (id: 23)
+[2026-02-19 22:39:39] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:39] DEBUG client_recv.c:72: PONG received (id: 23, RTT: 1 ms)
+[2026-02-19 22:39:44] DEBUG client_messaging.c:50: Sending PING (id: 24)
+[2026-02-19 22:39:44] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:44] DEBUG client_recv.c:72: PONG received (id: 24, RTT: 1 ms)
+[2026-02-19 22:39:49] DEBUG client_messaging.c:50: Sending PING (id: 25)
+[2026-02-19 22:39:49] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:49] DEBUG client_recv.c:72: PONG received (id: 25, RTT: 1 ms)
+[2026-02-19 22:39:54] DEBUG client_messaging.c:50: Sending PING (id: 26)
+[2026-02-19 22:39:54] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:54] DEBUG client_recv.c:72: PONG received (id: 26, RTT: 0 ms)
+[2026-02-19 22:39:59] DEBUG client_messaging.c:50: Sending PING (id: 27)
+[2026-02-19 22:39:59] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:39:59] DEBUG client_recv.c:72: PONG received (id: 27, RTT: 0 ms)
+[2026-02-19 22:40:04] DEBUG client_messaging.c:50: Sending PING (id: 28)
+[2026-02-19 22:40:04] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:04] DEBUG client_recv.c:72: PONG received (id: 28, RTT: 1 ms)
+[2026-02-19 22:40:09] DEBUG client_messaging.c:50: Sending PING (id: 29)
+[2026-02-19 22:40:09] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:09] DEBUG client_recv.c:72: PONG received (id: 29, RTT: 0 ms)
+[2026-02-19 22:40:14] DEBUG client_messaging.c:50: Sending PING (id: 30)
+[2026-02-19 22:40:14] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:14] DEBUG client_recv.c:72: PONG received (id: 30, RTT: 0 ms)
+[2026-02-19 22:40:19] DEBUG client_messaging.c:50: Sending PING (id: 31)
+[2026-02-19 22:40:19] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:19] DEBUG client_recv.c:72: PONG received (id: 31, RTT: 0 ms)
+[2026-02-19 22:40:24] DEBUG client_messaging.c:50: Sending PING (id: 32)
+[2026-02-19 22:40:24] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:24] DEBUG client_recv.c:72: PONG received (id: 32, RTT: 1 ms)
+[2026-02-19 22:40:29] DEBUG client_messaging.c:50: Sending PING (id: 33)
+[2026-02-19 22:40:29] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:29] DEBUG client_recv.c:72: PONG received (id: 33, RTT: 0 ms)
+[2026-02-19 22:40:34] DEBUG client_messaging.c:50: Sending PING (id: 34)
+[2026-02-19 22:40:34] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:34] DEBUG client_recv.c:72: PONG received (id: 34, RTT: 0 ms)
+[2026-02-19 22:40:39] DEBUG client_messaging.c:50: Sending PING (id: 35)
+[2026-02-19 22:40:39] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:39] DEBUG client_recv.c:72: PONG received (id: 35, RTT: 1 ms)
+[2026-02-19 22:40:44] DEBUG client_messaging.c:50: Sending PING (id: 36)
+[2026-02-19 22:40:44] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:44] DEBUG client_recv.c:72: PONG received (id: 36, RTT: 1 ms)
+[2026-02-19 22:40:49] DEBUG client_messaging.c:50: Sending PING (id: 37)
+[2026-02-19 22:40:49] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:49] DEBUG client_recv.c:72: PONG received (id: 37, RTT: 0 ms)
+[2026-02-19 22:40:54] DEBUG client_messaging.c:50: Sending PING (id: 38)
+[2026-02-19 22:40:54] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:54] DEBUG client_recv.c:72: PONG received (id: 38, RTT: 1 ms)
+[2026-02-19 22:40:59] DEBUG client_messaging.c:50: Sending PING (id: 39)
+[2026-02-19 22:40:59] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:40:59] DEBUG client_recv.c:72: PONG received (id: 39, RTT: 1 ms)
+[2026-02-19 22:41:04] DEBUG client_messaging.c:50: Sending PING (id: 40)
+[2026-02-19 22:41:04] DEBUG client_recv.c:64: Received PONG from relay
+[2026-02-19 22:41:04] DEBUG client_recv.c:72: PONG received (id: 40, RTT: 0 ms)
+[2026-02-19 22:41:06] INFO  main.c:21: Signal received, shutting down...
+[2026-02-19 22:41:06] INFO  client.c:134: Disconnecting from relay...
+[2026-02-19 22:41:06] INFO  client_recv.c:43: Connection closed by relay
+[2026-02-19 22:41:06] DEBUG client_recv.c:187: Receive thread exiting
+[2026-02-19 22:41:09] DEBUG client_recv.c:210: Auto-ping thread exiting
+[2026-02-19 22:41:09] INFO  client.c:159: Disconnected
+[2026-02-19 22:41:09] DEBUG nat_traversal.c:104: NAT manager cleaned up
+[2026-02-19 22:41:09] INFO  client.c:170: Client cleanup complete
+[2026-02-19 22:41:09] INFO  client.c:171: Statistics: 42 msgs sent, 42 msgs received, 6778 bytes sent, 6745 bytes received

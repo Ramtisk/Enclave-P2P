@@ -7,9 +7,15 @@
 #include <time.h>
 #include "config.h"
 
-// ============================================
-// MESSAGE TYPES
-// ============================================
+/*  ============================================
+    MESSAGE TYPES
+
+    Note: Enumerates all protocol message types used for communication between clients and relay.
+    Each value represents a specific protocol action, such as connection management, group management,
+    file transfer, P2P negotiation, and NAT traversal.
+    Used in the message header to identify the purpose of each message.
+
+    ============================================ */
 typedef enum
 {
     // Connection management
@@ -34,19 +40,19 @@ typedef enum
     MSG_GROUP_INFO = 0x28,
 
     // File transfer (Phase 3)
-    MSG_FILE_ANNOUNCE = 0x30,     // Announce file availability
-    MSG_FILE_LIST = 0x31,         // Request/Response file list
-    MSG_FILE_REQUEST = 0x32,      // Request file metadata
-    MSG_FILE_METADATA = 0x33,     // File metadata response
-    MSG_CHUNK_REQUEST = 0x34,     // Request specific chunk
-    MSG_CHUNK_DATA = 0x35,        // Chunk data response
-    MSG_CHUNK_ACK = 0x36,         // Chunk received acknowledgment
-    MSG_TRANSFER_COMPLETE = 0x37, // Transfer completed
+    MSG_FILE_ANNOUNCE = 0x30,
+    MSG_FILE_LIST = 0x31,
+    MSG_FILE_REQUEST = 0x32,
+    MSG_FILE_METADATA = 0x33,
+    MSG_CHUNK_REQUEST = 0x34,
+    MSG_CHUNK_DATA = 0x35,
+    MSG_CHUNK_ACK = 0x36,
+    MSG_TRANSFER_COMPLETE = 0x37,
 
     // P2P Direct connection
-    MSG_P2P_CONNECT = 0x38, // Direct P2P connection request
-    MSG_P2P_ACCEPT = 0x39,  // Accept P2P connection
-    MSG_P2P_REJECT = 0x3A,  // Reject P2P connection
+    MSG_P2P_CONNECT = 0x38,
+    MSG_P2P_ACCEPT = 0x39,
+    MSG_P2P_REJECT = 0x3A,
 
     // NAT Traversal (Phase 4)
     MSG_NAT_DISCOVER = 0x51,     // Client → Relay: "what's my public IP?"
@@ -62,11 +68,14 @@ typedef enum
 
 } message_type_t;
 
-// ============================================
-// MESSAGE HEADER
-// ============================================
-#define PROTOCOL_MAGIC 0x50325050 // "P2PP"
-#define PROTOCOL_VERSION 1
+/*  ============================================
+    MESSAGE HEADER
+
+    Note: Structure for the protocol message header.
+    Contains protocol magic, version, message type, flags, payload length, timestamp,
+    and sender/target IDs. All messages start with this header.
+
+    ============================================ */
 
 typedef struct __attribute__((packed))
 {
@@ -80,18 +89,28 @@ typedef struct __attribute__((packed))
     char target_id[MAX_ID_LENGTH];
 } message_header_t;
 
-// ============================================
-// MESSAGE STRUCTURE
-// ============================================
+/*  ============================================
+    MESSAGE STRUCTURE
+
+    Note: Represents a complete protocol message, including header and payload.
+    The payload is a byte array whose interpretation depends on the message type.
+
+    ============================================ */
 typedef struct __attribute__((packed))
 {
     message_header_t header;
     uint8_t payload[MAX_PAYLOAD_SIZE];
 } message_t;
 
-// ============================================
-// PAYLOAD STRUCTURES
-// ============================================
+/*  ============================================
+    PAYLOAD STRUCTURES
+
+    Note: Defines the structure of payloads for specific message types.
+    Each struct matches the expected data for a given protocol action (e.g., ping, connect, group join, file transfer).
+    
+    ============================================ */
+#define PROTOCOL_MAGIC 0x50325050 // "P2PP"
+#define PROTOCOL_VERSION 1
 
 // MSG_PING / MSG_PONG
 typedef struct __attribute__((packed))
@@ -121,10 +140,13 @@ typedef struct __attribute__((packed))
     } peers[MAX_CLIENTS];
 } payload_peer_list_t;
 
-// ============================================
-// GROUP PAYLOAD STRUCTURES (Phase 2)
-// ============================================
+/*  ============================================
+    GROUP PAYLOAD STRUCTURES (Phase 2)
 
+    Note: Payloads for group management operations, such as creating, joining, voting, and inviting members to groups.
+    Used to coordinate group membership and permissions.
+
+    ============================================ */
 #define MAX_GROUP_NAME 64
 #define INVITE_TOKEN_LENGTH 32
 
@@ -306,115 +328,13 @@ typedef struct __attribute__((packed))
     uint16_t port;
 } payload_p2p_accept_t;
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
+/*  ============================================
+    HELPER FUNCTIONS
+    ============================================ */
 
-static inline void message_header_init(message_header_t *header, message_type_t type)
-{
-    memset(header, 0, sizeof(message_header_t));
-    header->magic = PROTOCOL_MAGIC;
-    header->version = PROTOCOL_VERSION;
-    header->type = (uint8_t)type;
-    header->flags = 0;
-    header->payload_length = 0;
-
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    header->timestamp = (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
-}
-
-static inline int message_validate(const message_t *msg)
-{
-    if (!msg)
-        return -1;
-    if (msg->header.magic != PROTOCOL_MAGIC)
-        return -2;
-    if (msg->header.version != PROTOCOL_VERSION)
-        return -3;
-    if (msg->header.payload_length > MAX_PAYLOAD_SIZE)
-        return -4;
-    return 0;
-}
-
-static inline size_t message_total_size(const message_t *msg)
-{
-    return sizeof(message_header_t) + msg->header.payload_length;
-}
-
-static inline const char *message_type_string(message_type_t type)
-{
-    switch (type)
-    {
-    case MSG_CONNECT:
-        return "CONNECT";
-    case MSG_DISCONNECT:
-        return "DISCONNECT";
-    case MSG_ACK:
-        return "ACK";
-    case MSG_NACK:
-        return "NACK";
-    case MSG_PING:
-        return "PING";
-    case MSG_PONG:
-        return "PONG";
-    case MSG_GROUP_CREATE:
-        return "GROUP_CREATE";
-    case MSG_GROUP_JOIN:
-        return "GROUP_JOIN";
-    case MSG_GROUP_LEAVE:
-        return "GROUP_LEAVE";
-    case MSG_GROUP_VOTE:
-        return "GROUP_VOTE";
-    case MSG_GROUP_INVITE:
-        return "GROUP_INVITE";
-    case MSG_GROUP_VOTE_REQ:
-        return "GROUP_VOTE_REQ";
-    case MSG_GROUP_APPROVED:
-        return "GROUP_APPROVED";
-    case MSG_GROUP_REJECTED:
-        return "GROUP_REJECTED";
-    case MSG_GROUP_INFO:
-        return "GROUP_INFO";
-    case MSG_FILE_ANNOUNCE:
-        return "FILE_ANNOUNCE";
-    case MSG_FILE_LIST:
-        return "FILE_LIST";
-    case MSG_FILE_REQUEST:
-        return "FILE_REQUEST";
-    case MSG_FILE_METADATA:
-        return "FILE_METADATA";
-    case MSG_CHUNK_REQUEST:
-        return "CHUNK_REQUEST";
-    case MSG_CHUNK_DATA:
-        return "CHUNK_DATA";
-    case MSG_CHUNK_ACK:
-        return "CHUNK_ACK";
-    case MSG_TRANSFER_COMPLETE:
-        return "TRANSFER_COMPLETE";
-    case MSG_P2P_CONNECT:
-        return "P2P_CONNECT";
-    case MSG_P2P_ACCEPT:
-        return "P2P_ACCEPT";
-    case MSG_P2P_REJECT:
-        return "P2P_REJECT";
-    case MSG_PEER_LIST:
-        return "PEER_LIST";
-    case MSG_NAT_DISCOVER:
-        return "NAT_DISCOVER";
-    case MSG_NAT_INFO:
-        return "NAT_INFO";
-    case MSG_NAT_PUNCH_REQ:
-        return "NAT_PUNCH_REQ";
-    case MSG_NAT_PUNCH_INSTR:
-        return "NAT_PUNCH_INSTR";
-    case MSG_NAT_PUNCH_RESULT:
-        return "NAT_PUNCH_RESULT";
-    case MSG_NAT_RELAY_DATA:
-        return "NAT_RELAY_DATA";
-    default:
-        return "UNKNOWN";
-    }
-}
+void message_header_init(message_header_t *header, message_type_t type);
+int  message_validate(const message_t *msg);
+size_t message_total_size(const message_t *msg);
+const char *message_type_string(message_type_t type);
 
 #endif // P2P_PROTOCOL_H

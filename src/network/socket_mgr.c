@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "socket_mgr.h"
 #include "../common/logging.h"
 #include "../common/config.h"

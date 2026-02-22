@@ -3,9 +3,9 @@
 #include <signal.h>
 #include <string.h>
 
-#include "../../src/common/config.h"
-#include "../../src/common/logging.h"
-#include "../../src/network/relay.h"
+#include "common/config.h"
+#include "common/logging.h"
+#include "network/relay/relay.h"
 
 static relay_server_t g_server;
 

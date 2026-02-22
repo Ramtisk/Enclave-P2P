@@ -41,7 +41,7 @@ int tls_context_init(tls_context_t* ctx) {
     memset(ctx, 0, sizeof(tls_context_t));
     
     // Generate ephemeral keypair
-    if (crypto_kx_keypair(ctx->local_pk, ctx->local_sk) != 0) {
+    if (p2p_kx_keypair(ctx->local_pk, ctx->local_sk) != 0) {
         LOG_ERROR("tls: Failed to generate ephemeral keypair");
         return -1;
     }
@@ -57,9 +57,9 @@ int tls_context_init(tls_context_t* ctx) {
 
 void tls_context_cleanup(tls_context_t* ctx) {
     // Zero sensitive material
-    crypto_memzero(ctx->local_sk, sizeof(ctx->local_sk));
-    crypto_memzero(ctx->tx_key, sizeof(ctx->tx_key));
-    crypto_memzero(ctx->rx_key, sizeof(ctx->rx_key));
+    p2p_memzero(ctx->local_sk, sizeof(ctx->local_sk));
+    p2p_memzero(ctx->tx_key, sizeof(ctx->tx_key));
+    p2p_memzero(ctx->rx_key, sizeof(ctx->rx_key));
     
     ctx->state = TLS_STATE_CLOSED;
     ctx->fd = -1;
@@ -147,7 +147,7 @@ int tls_handshake_client(tls_context_t* ctx, int fd) {
     }
     
     // Step 3: Derive session keys (client side)
-    if (crypto_kx_session_keys(ctx->rx_key, ctx->tx_key,
+    if (p2p_kx_session_keys(ctx->rx_key, ctx->tx_key,
                                 ctx->local_pk, ctx->local_sk,
                                 ctx->remote_pk, true) != 0) {
         LOG_ERROR("tls: Key derivation failed");
@@ -163,7 +163,7 @@ int tls_handshake_client(tls_context_t* ctx, int fd) {
     memset(verify_nonce, 0, TLS_NONCE_SIZE);
     
     size_t ct_len;
-    if (crypto_aead_encrypt(verify_ct, &ct_len,
+    if (p2p_aead_encrypt(verify_ct, &ct_len,
                             verify_pt, 32,
                             NULL, 0,
                             verify_nonce, ctx->tx_key) != 0) {
@@ -189,7 +189,7 @@ int tls_handshake_client(tls_context_t* ctx, int fd) {
     
     uint8_t server_pt[32];
     size_t pt_len;
-    if (crypto_aead_decrypt(server_pt, &pt_len,
+    if (p2p_aead_decrypt(server_pt, &pt_len,
                             server_ct, 32 + TLS_TAG_SIZE,
                             NULL, 0,
                             verify_nonce, ctx->rx_key) != 0) {
@@ -232,7 +232,7 @@ int tls_handshake_server(tls_context_t* ctx, int fd) {
     }
     
     // Step 3: Derive session keys (server side)
-    if (crypto_kx_session_keys(ctx->rx_key, ctx->tx_key,
+    if (p2p_kx_session_keys(ctx->rx_key, ctx->tx_key,
                                 ctx->local_pk, ctx->local_sk,
                                 ctx->remote_pk, false) != 0) {
         LOG_ERROR("tls: Key derivation failed");
@@ -254,7 +254,7 @@ int tls_handshake_server(tls_context_t* ctx, int fd) {
     
     uint8_t client_pt[32];
     size_t pt_len;
-    if (crypto_aead_decrypt(client_pt, &pt_len,
+    if (p2p_aead_decrypt(client_pt, &pt_len,
                             client_ct, 32 + TLS_TAG_SIZE,
                             NULL, 0,
                             verify_nonce, ctx->rx_key) != 0) {
@@ -273,7 +273,7 @@ int tls_handshake_server(tls_context_t* ctx, int fd) {
     // Step 5: Send our verification token
     uint8_t verify_ct[32 + TLS_TAG_SIZE];
     size_t ct_len;
-    if (crypto_aead_encrypt(verify_ct, &ct_len,
+    if (p2p_aead_encrypt(verify_ct, &ct_len,
                             expected, 32,
                             NULL, 0,
                             verify_nonce, ctx->tx_key) != 0) {
@@ -330,7 +330,7 @@ ssize_t tls_send(tls_context_t* ctx, const void* data, size_t len) {
     size_t ct_len;
     uint8_t ciphertext[TLS_MAX_FRAME_SIZE];
     
-    if (crypto_aead_encrypt(ciphertext, &ct_len,
+    if (p2p_aead_encrypt(ciphertext, &ct_len,
                             (const uint8_t*)data, len,
                             NULL, 0,
                             nonce, ctx->tx_key) != 0) {
@@ -436,7 +436,7 @@ int tls_cert_init(tls_certificate_t* cert) {
     memset(cert, 0, sizeof(tls_certificate_t));
     
     // Generate Ed25519 identity keypair
-    if (crypto_sign_keypair(cert->identity_pk, cert->identity_sk) != 0) {
+    if (p2p_sign_keypair(cert->identity_pk, cert->identity_sk) != 0) {
         LOG_ERROR("tls: Failed to generate identity keypair");
         return -1;
     }
@@ -448,7 +448,7 @@ int tls_cert_init(tls_certificate_t* cert) {
 }
 
 void tls_cert_cleanup(tls_certificate_t* cert) {
-    crypto_memzero(cert->identity_sk, sizeof(cert->identity_sk));
+    p2p_memzero(cert->identity_sk, sizeof(cert->identity_sk));
     cert->valid = false;
 }
 
@@ -458,7 +458,7 @@ int tls_cert_sign_key(const tls_certificate_t* cert,
     if (!cert->valid) return -1;
     
     size_t sig_len;
-    return crypto_sign(sig, &sig_len,
+    return p2p_sign_create(sig, &sig_len,
                        ephemeral_pk, CRYPTO_KX_PK_SIZE,
                        cert->identity_sk);
 }
@@ -466,7 +466,7 @@ int tls_cert_sign_key(const tls_certificate_t* cert,
 int tls_cert_verify_key(const uint8_t identity_pk[CRYPTO_SIGN_PK_SIZE],
                         const uint8_t ephemeral_pk[CRYPTO_KX_PK_SIZE],
                         const uint8_t sig[CRYPTO_SIGN_SIZE]) {
-    return crypto_sign_verify(sig, ephemeral_pk, CRYPTO_KX_PK_SIZE, identity_pk);
+    return p2p_sign_verify(sig, ephemeral_pk, CRYPTO_KX_PK_SIZE, identity_pk);
 }
 
 // ============================================
